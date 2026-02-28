@@ -1,0 +1,26 @@
+img = imread('RohitSharma.jpg');
+grayImg = rgb2gray(img);
+
+g = im2double(grayImg);
+rgbD = im2double(img);
+
+negImg = 1 - g;
+
+c = 1;
+logImg = c * log(1 + g);
+logImg = mat2gray(logImg);
+
+gamma = 0.5;
+powerImg = g .^ gamma;
+
+rmin = min(g(:));
+rmax = max(g(:));
+stretchImg = (g - rmin) / (rmax - rmin);
+
+figure;
+subplot(2,4,1), imshow(rgbD),      title('Original RGB')
+subplot(2,4,2), imshow(g),         title('Grayscale')
+subplot(2,4,3), imshow(negImg),    title('Negative')
+subplot(2,4,4), imshow(logImg),    title('Log Transform')
+subplot(2,4,5), imshow(powerImg),  title('Gamma Transform')
+subplot(2,4,6), imshow(stretchImg),title('Contrast Stretched')
