@@ -1,0 +1,52 @@
+import cv2
+import numpy as np
+from google.colab import files
+from google.colab.patches import cv2_imshow
+
+# Upload image
+uploaded = files.upload()
+image_path = list(uploaded.keys())[0]
+
+# Read image
+img = cv2.imread(image_path)
+gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Create a fake second frame by shifting the image
+M = np.float32([[1,0,5],[0,1,5]])
+img_shift = cv2.warpAffine(img, M, (img.shape[1], img.shape[0]))
+gray2 = cv2.cvtColor(img_shift, cv2.COLOR_BGR2GRAY)
+
+# Calculate optical flow
+flow = cv2.calcOpticalFlowFarneback(
+    gray1, gray2, None,
+    0.5, 3, 15, 3, 5, 1.2, 0
+)
+
+step = 16
+scale = 3
+overlay = img.copy()
+
+# Draw arrows
+for y in range(0, img.shape[0], step):
+    for x in range(0, img.shape[1], step):
+        fx, fy = flow[y, x]
+
+        if np.hypot(fx, fy) > 1:
+            cv2.arrowedLine(
+                overlay,
+                (x, y),
+                (int(x + scale * fx), int(y + scale * fy)),
+                (0, 255, 0),
+                1,
+                tipLength=0.3
+            )
+
+# Reduce output size
+scale_percent = 50
+width = int(overlay.shape[1] * scale_percent / 100)
+height = int(overlay.shape[0] * scale_percent / 100)
+
+small_output = cv2.resize(overlay, (width, height))
+
+# Display result
+cv2_imshow(small_output)
